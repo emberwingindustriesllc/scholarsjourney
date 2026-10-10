@@ -1,0 +1,1373 @@
+/* SAT Masters: Scholar's Journey — NES 8-bit pixel art theme */
+/* Educational SAT-prep RPG */
+
+:root {
+    /* NES-limited palette */
+    --nes-black: #000000;
+    --nes-white: #FFFFFF;
+    --nes-red: #FF0000;
+    --nes-green: #00FF00;
+    --nes-blue: #0000FF;
+    --nes-yellow: #FFFF00;
+    --nes-magenta: #FF00FF;
+    --nes-cyan: #00FFFF;
+    --nes-gray: #808080;
+    --nes-silver: #C0C0C0;
+    --nes-maroon: #800000;
+    --nes-darkgreen: #008000;
+    --nes-navy: #000080;
+    --nes-olive: #808000;
+    --nes-purple: #800080;
+    --nes-teal: #008080;
+
+    /* Semantic NES colors */
+    --bg-dark: #000000;
+    --bg-medium: #000080;
+    --bg-light: #008080;
+    --accent-gold: #FFFF00;
+    --accent-blue: #00FFFF;
+    --accent-green: #00FF00;
+    --accent-red: #FF0000;
+    --accent-purple: #FF00FF;
+    --text-light: #FFFFFF;
+    --text-muted: #C0C0C0;
+    --border-gold: #FFFF00;
+    --border-dark: #000000;
+    --card-bg: #000080;
+    --shadow: 4px 4px 0 #000000;
+
+    /* Map tile NES colors */
+    --gba-grass-light: #00FF00;
+    --gba-grass-dark: #008000;
+    --gba-grass-texture: #C0C0C0;
+    --gba-path-light: #C0C0C0;
+    --gba-path-dark: #808080;
+    --gba-path-cobble: #FFFFFF;
+    --gba-water-light: #00FFFF;
+    --gba-water-dark: #0000FF;
+    --gba-water-wave: #FFFFFF;
+    --gba-tree-canopy: #008000;
+    --gba-tree-trunk: #800000;
+    --gba-tree-highlight: #00FF00;
+    --gba-building-wall: #C0C0C0;
+    --gba-roof-red: #FF0000;
+    --gba-academy-gold: #FFFF00;
+    --gba-academy-gold-dark: #808000;
+    --gba-bridge-wood: #808000;
+    --gba-bridge-plank: #800000;
+    --gba-rock: #808080;
+    --gba-rock-dark: #000000;
+    --gba-flower-pink: #FF00FF;
+    --gba-flower-yellow: #FFFF00;
+    --gba-sign: #808080;
+    --gba-player-glow: #FFFF00;
+    --gba-tower: #FF00FF;
+    --gba-gate: #FFFF00;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: #000000;
+    color: #FFFFFF;
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+    overflow: hidden;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    image-rendering: pixelated;
+    -ms-interpolation-mode: nearest-neighbor;
+}
+
+/* NES-style double border: outer dark + inner light */
+#game-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    max-width: 1200px;
+    border: 3px solid #FFFF00;
+    border-radius: 0;
+    overflow: hidden;
+    box-shadow: 6px 6px 0 #000000;
+    position: relative;
+}
+
+/* Scanline overlay */
+#game-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+        0deg,
+        transparent 0px,
+        transparent 1px,
+        rgba(0, 0, 0, 0.12) 1px,
+        rgba(0, 0, 0, 0.12) 2px
+    );
+    pointer-events: none;
+    z-index: 9999;
+}
+
+/* ===== Main Row: game canvas + sidebar side by side ===== */
+#main-row {
+    display: flex;
+    flex-direction: row;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+/* ===== HUD ===== */
+#hud {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 16px;
+    background: #000080;
+    border-bottom: 3px solid #FFFF00;
+    min-height: 50px;
+    font-size: 10px;
+    color: #FFFFFF;
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+}
+
+.hud-left, .hud-right {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+#player-name {
+    font-weight: bold;
+    color: #FFFF00;
+    font-size: 11px;
+}
+
+#player-level {
+    background: #0000FF;
+    padding: 4px 8px;
+    border: 2px solid #FFFFFF;
+    border-radius: 0;
+    font-size: 9px;
+}
+
+#player-score {
+    color: #00FF00;
+    font-weight: bold;
+}
+
+#player-gold {
+    color: #FFFF00;
+    font-weight: bold;
+}
+
+#badge-count {
+    color: #FF00FF;
+    font-weight: bold;
+}
+
+/* ===== Main Canvas ===== */
+#game-canvas {
+    flex: 1 1 auto;
+    min-width: 0;
+    background: #000000;
+    overflow: hidden;
+    position: relative;
+}
+
+/* ===== Sidebar ===== */
+#sidebar {
+    flex: 0 0 280px;
+    width: 280px;
+    background: #000080;
+    border-left: 3px solid #FFFF00;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+#sidebar > div {
+    border-bottom: 2px solid #FFFF00;
+    padding: 12px;
+}
+
+#sidebar h3 {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #FFFF00;
+    margin-bottom: 8px;
+}
+
+/* Player Card */
+#player-avatar {
+    font-size: 48px;
+    text-align: center;
+    margin: 8px 0;
+}
+
+#player-stats {
+    margin-top: 8px;
+}
+
+.stat-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    font-size: 9px;
+}
+
+.stat-bar label {
+    width: 55px;
+    text-align: right;
+    color: #C0C0C0;
+}
+
+.bar {
+    flex: 1;
+    height: 8px;
+    background: #000000;
+    border-radius: 0;
+    overflow: hidden;
+    border: 2px solid #000000;
+}
+
+.bar-fill {
+    height: 100%;
+    border-radius: 0;
+    transition: width 0.5s ease;
+    width: 0%;
+}
+
+.bar-fill.math { background: #0000FF; }
+.bar-fill.reading { background: #00FF00; }
+.bar-fill.writing { background: #FF00FF; }
+
+/* Badges */
+#badges-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+}
+
+.badge {
+    width: 40px;
+    height: 40px;
+    border-radius: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    border: 2px solid #000000;
+    background: #000080;
+    opacity: 0.3;
+    transition: all 0.3s;
+}
+
+.badge.earned {
+    opacity: 1;
+    border-color: #FFFF00;
+    box-shadow: 2px 2px 0 #000000;
+}
+
+/* Log */
+#log-entries {
+    max-height: 200px;
+    overflow-y: auto;
+    font-size: 9px;
+    color: #C0C0C0;
+}
+
+.log-entry {
+    padding: 3px 0;
+    border-bottom: 1px solid #808080;
+    line-height: 1.5;
+}
+
+.log-entry:first-child {
+    color: #FFFFFF;
+}
+
+/* ===== Screen: Title ===== */
+.title-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    background: #000000;
+    gap: 16px;
+}
+
+.title-logo {
+    font-size: 28px;
+    font-weight: bold;
+    color: #FFFF00;
+    text-shadow: 3px 3px 0 #FF0000;
+    margin-bottom: 10px;
+    letter-spacing: 2px;
+    text-align: center;
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+}
+
+.title-subtitle {
+    font-size: 12px;
+    color: #C0C0C0;
+    margin-bottom: 40px;
+    font-style: italic;
+}
+
+.title-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 300px;
+}
+
+.menu-btn {
+    padding: 12px 20px;
+    font-size: 11px;
+    font-weight: bold;
+    border: 3px solid #FFFF00;
+    border-radius: 0;
+    background: #000080;
+    color: #FFFFFF;
+    cursor: pointer;
+    transition: all 0.1s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+}
+
+.menu-btn:hover {
+    background: #FFFF00;
+    color: #000000;
+    box-shadow: 3px 3px 0 #000000;
+    transform: scale(1.02);
+}
+
+.menu-btn.primary {
+    background: #FFFF00;
+    color: #000000;
+}
+
+.menu-btn.primary:hover {
+    background: #00FF00;
+    border-color: #00FF00;
+    color: #000000;
+}
+
+/* ===== Screen: Overworld Map — NES overworld ===== */
+.map-screen {
+    height: 100%;
+    position: relative;
+    background: #008000;
+    image-rendering: pixelated;
+    display: flex;
+    flex-direction: column;
+}
+
+.map-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: repeat(10, 1fr);
+    gap: 0;
+    padding: 0;
+    min-height: 0;
+    aspect-ratio: 12 / 10;
+    max-width: 100%;
+    max-height: calc(100% - 34px);
+    margin: auto;
+}
+
+.map-tile {
+    border: 1px solid #000000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    position: relative;
+    cursor: pointer;
+    transition: filter 0.15s;
+    overflow: hidden;
+}
+
+.map-tile:hover {
+    filter: brightness(1.2);
+    z-index: 2;
+}
+
+/* Grass tiles — flat NES green with texture dots */
+.map-tile.grass {
+    background-color: #00FF00;
+    background-image: none;
+}
+
+.map-tile.grass::before {
+    content: '';
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: #008000;
+    top: 3px;
+    left: 3px;
+    box-shadow: 8px 6px 0 #008000, 4px 10px 0 #008000;
+    z-index: 1;
+}
+
+.map-tile.grass-alt {
+    background-color: #008000;
+    background-image: none;
+}
+
+.map-tile.grass-alt::before {
+    content: '';
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: #00FF00;
+    top: 4px;
+    left: 4px;
+    box-shadow: 8px 5px 0 #00FF00, 3px 9px 0 #00FF00;
+    z-index: 1;
+}
+
+/* Path tiles — flat gray with cobble dots */
+.map-tile.path {
+    background-color: #C0C0C0;
+    background-image: none;
+    box-shadow: none;
+}
+
+.map-tile.path::before {
+    content: '';
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: #808080;
+    top: 5px;
+    left: 5px;
+    box-shadow: 10px 8px 0 #808080, 4px 14px 0 #808080, 12px 3px 0 #808080;
+    z-index: 1;
+}
+
+/* Water tiles — flat NES blue with wave lines */
+.map-tile.water {
+    background-color: #0000FF;
+    background-image: none;
+    animation: water-shimmer 3s ease-in-out infinite;
+}
+
+.map-tile.water::before {
+    content: '';
+    position: absolute;
+    width: 6px;
+    height: 2px;
+    background: #00FFFF;
+    top: 4px;
+    left: 4px;
+    box-shadow: 0 8px 0 #00FFFF, 10px 14px 0 #00FFFF;
+    z-index: 1;
+}
+
+@keyframes water-shimmer {
+    0%, 100% { filter: brightness(1); }
+    50% { filter: brightness(1.15); }
+}
+
+/* Building tiles — flat wall + red triangle roof */
+.map-tile.building {
+    background-color: #C0C0C0;
+    position: relative;
+}
+
+.map-tile.building::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 40%;
+    background: #FF0000;
+    clip-path: polygon(0 100%, 50% 0, 100% 100%);
+    z-index: 1;
+}
+
+.map-tile.building::after {
+    content: '';
+    position: absolute;
+    bottom: 10%;
+    left: 20%;
+    right: 20%;
+    height: 15%;
+    background: #800000;
+    border-radius: 0;
+    z-index: 1;
+}
+
+/* Academy tiles — gold flat with border */
+.map-tile.academy {
+    background: #FFFF00;
+    box-shadow: inset 0 0 0 2px #808000;
+    position: relative;
+}
+
+.map-tile.academy::before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    right: 2px;
+    bottom: 2px;
+    border: 2px solid #808000;
+    border-radius: 0;
+    z-index: 1;
+}
+
+/* Tree tiles — flat green canopy + brown trunk */
+.map-tile.tree {
+    background-color: #008000;
+    position: relative;
+}
+
+.map-tile.tree::before {
+    content: '';
+    position: absolute;
+    top: 8%;
+    left: 20%;
+    right: 20%;
+    bottom: 30%;
+    background: #00FF00;
+    border-radius: 0;
+    box-shadow: none;
+    border: 2px solid #000000;
+    z-index: 1;
+}
+
+.map-tile.tree::after {
+    content: '';
+    position: absolute;
+    bottom: 8%;
+    left: 42%;
+    right: 42%;
+    height: 28%;
+    background: #800000;
+    border-radius: 0;
+    box-shadow: none;
+    border: 1px solid #000000;
+    z-index: 2;
+}
+
+/* Flower tiles — flat green with flower pixels */
+.map-tile.flower {
+    background-color: #00FF00;
+    background-image: none;
+}
+
+.map-tile.flower::before {
+    content: '';
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: #FF00FF;
+    top: 5px;
+    left: 5px;
+    box-shadow: 10px 10px 0 #FFFF00, 4px 14px 0 #FFFF00;
+    z-index: 1;
+}
+
+/* Rock tiles — flat gray rock */
+.map-tile.rock {
+    background-color: #008000;
+    position: relative;
+}
+
+.map-tile.rock::before {
+    content: '';
+    position: absolute;
+    top: 15%;
+    left: 20%;
+    right: 20%;
+    bottom: 15%;
+    background: #808080;
+    border-radius: 0;
+    box-shadow: 2px 2px 0 #000000;
+    border: 2px solid #000000;
+    z-index: 1;
+}
+
+.map-tile.rock::after {
+    content: '';
+    position: absolute;
+    top: 25%;
+    left: 30%;
+    width: 25%;
+    height: 20%;
+    background: #FFFFFF;
+    border-radius: 0;
+    z-index: 2;
+}
+
+/* Bridge tiles — flat wood planks */
+.map-tile.bridge {
+    background-color: #0000FF;
+    position: relative;
+}
+
+.map-tile.bridge::before {
+    content: '';
+    position: absolute;
+    top: 10%;
+    left: 0;
+    right: 0;
+    bottom: 10%;
+    background-color: #808000;
+    background-image: repeating-linear-gradient(
+        90deg,
+        #800000 0px,
+        #800000 2px,
+        transparent 2px,
+        transparent 8px
+    );
+    border-left: 2px solid #800000;
+    border-right: 2px solid #800000;
+    z-index: 1;
+}
+
+.map-tile.bridge::after {
+    content: '';
+    position: absolute;
+    top: 5%;
+    left: 5%;
+    right: 5%;
+    bottom: 5%;
+    border: 2px solid #000000;
+    z-index: 2;
+}
+
+/* House tiles — flat wall + brown roof */
+.map-tile.house {
+    background-color: #C0C0C0;
+    position: relative;
+}
+
+.map-tile.house::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 35%;
+    background: #800000;
+    clip-path: polygon(0 100%, 50% 0, 100% 100%);
+    z-index: 1;
+}
+
+.map-tile.house::after {
+    content: '';
+    position: absolute;
+    bottom: 12%;
+    left: 25%;
+    right: 25%;
+    height: 18%;
+    background: #000000;
+    border-radius: 0;
+    z-index: 1;
+}
+
+/* Sign tiles — flat sign post */
+.map-tile.sign {
+    background-color: #008000;
+    position: relative;
+}
+
+.map-tile.sign::before {
+    content: '';
+    position: absolute;
+    top: 20%;
+    left: 30%;
+    right: 30%;
+    bottom: 30%;
+    background: #808080;
+    border-radius: 0;
+    box-shadow: 2px 2px 0 #000000;
+    z-index: 1;
+}
+
+.map-tile.sign::after {
+    content: '';
+    position: absolute;
+    bottom: 10%;
+    left: 45%;
+    right: 45%;
+    height: 25%;
+    background: #800000;
+    z-index: 2;
+}
+
+/* Gate tiles — flat gold gate */
+.map-tile.gate {
+    background-color: #008000;
+    position: relative;
+}
+
+.map-tile.gate::before {
+    content: '';
+    position: absolute;
+    top: 10%;
+    left: 15%;
+    right: 15%;
+    bottom: 10%;
+    background: #FFFF00;
+    border-radius: 0;
+    box-shadow: 2px 2px 0 #000000;
+    z-index: 1;
+}
+
+.map-tile.gate::after {
+    content: '';
+    position: absolute;
+    top: 15%;
+    left: 40%;
+    right: 40%;
+    height: 20%;
+    background: #FFFFFF;
+    border-radius: 0;
+    z-index: 2;
+}
+
+/* Final Exam tower — flat magenta tower */
+.map-tile.tower {
+    background-color: #FF00FF;
+    box-shadow: inset 0 0 0 2px #000000;
+    position: relative;
+}
+
+.map-tile.tower::before {
+    content: '';
+    position: absolute;
+    top: 5%;
+    left: 25%;
+    right: 25%;
+    height: 30%;
+    background: #FF00FF;
+    clip-path: polygon(50% 0, 100% 100%, 0 100%);
+    z-index: 1;
+}
+
+.map-tile.tower::after {
+    content: '';
+    position: absolute;
+    top: 40%;
+    left: 35%;
+    right: 35%;
+    bottom: 15%;
+    background: #000000;
+    border-radius: 0;
+    z-index: 1;
+}
+
+.map-tile.defeated {
+    opacity: 0.4;
+    filter: grayscale(0.5);
+}
+
+/* Player position — flat yellow highlight border */
+.map-tile.player-pos {
+    box-shadow: inset 0 0 0 3px #FFFF00;
+    z-index: 3;
+    animation: player-glow 1.5s ease-in-out infinite;
+}
+
+@keyframes player-glow {
+    0%, 100% {
+        box-shadow: inset 0 0 0 3px #FFFF00;
+    }
+    50% {
+        box-shadow: inset 0 0 0 3px #FFFFFF;
+    }
+}
+
+.player-sprite {
+    font-size: 20px;
+    filter: none;
+    animation: player-bounce 1.2s ease-in-out infinite;
+    position: relative;
+    z-index: 5;
+}
+
+@keyframes player-bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-2px); }
+}
+
+/* Map label */
+.map-label {
+    position: absolute;
+    bottom: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 7px;
+    color: #FFFFFF;
+    text-shadow: 1px 1px 0 #000000;
+    pointer-events: none;
+    white-space: nowrap;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    z-index: 4;
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+}
+
+/* ===== Map Legend Bar ===== */
+.map-legend {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 34px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 18px;
+    background: #000000;
+    border-top: 3px solid #FFFF00;
+    font-size: 8px;
+    color: #FFFFFF;
+    z-index: 10;
+    padding: 0 12px;
+    overflow-x: auto;
+}
+
+.map-legend span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+}
+
+/* ===== Screen: Battle ===== */
+.battle-screen {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: #008000;
+    overflow: hidden;
+    position: relative;
+}
+
+.battle-field {
+    flex: 0 0 35%;
+    min-height: 180px;
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 30px;
+}
+
+.challenger-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.challenger-sprite {
+    font-size: 48px;
+    filter: none;
+    border: 3px solid #000000;
+    padding: 8px;
+    background: #C0C0C0;
+    box-shadow: 4px 4px 0 #000000;
+}
+
+.challenger-info {
+    background: #FFFFFF;
+    border: 3px solid #000000;
+    border-radius: 0;
+    padding: 8px 16px;
+    text-align: center;
+    min-width: 140px;
+    box-shadow: 3px 3px 0 #000000;
+}
+
+.challenger-name {
+    font-weight: bold;
+    font-size: 10px;
+    color: #000000;
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+}
+
+.challenger-subtitle {
+    font-size: 9px;
+    color: #808080;
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+}
+
+.hp-bar-container {
+    width: 100%;
+    height: 10px;
+    background: #000000;
+    border: 2px solid #000000;
+    border-radius: 0;
+    margin-top: 4px;
+    overflow: hidden;
+}
+
+.hp-bar-fill {
+    height: 100%;
+    background: #00FF00;
+    border-radius: 0;
+    transition: width 0.3s;
+}
+
+.hp-bar-fill.medium { background: #FFFF00; }
+.hp-bar-fill.low { background: #FF0000; }
+
+.vs-badge {
+    font-size: 20px;
+    font-weight: bold;
+    color: #FFFF00;
+    text-shadow: 2px 2px 0 #000000;
+    background: #000080;
+    border-radius: 0;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid #FFFF00;
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+}
+
+.battle-bottom {
+    flex: 1 1 auto;
+    min-height: 0;
+    background: #000000;
+    border-top: 3px solid #FFFF00;
+    padding: 16px 24px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.battle-dialog {
+    min-height: 60px;
+    margin-bottom: 12px;
+    padding: 10px 12px;
+    background: #000080;
+    border: 3px solid #FFFF00;
+    border-radius: 0;
+    border-left: 4px solid #FFFF00;
+    font-size: 10px;
+    line-height: 1.6;
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+}
+
+.question-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.question-text {
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.5;
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+}
+
+.question-category {
+    display: inline-block;
+    font-size: 8px;
+    padding: 4px 8px;
+    border-radius: 0;
+    background: #0000FF;
+    color: #FFFFFF;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 2px solid #000000;
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+}
+
+.question-category.diff {
+    background: #FFFF00;
+    color: #000000;
+}
+
+.question-category.math { background: #0000FF; }
+.question-category.reading { background: #00FF00; color: #000000; }
+.question-category.writing { background: #FF00FF; }
+
+.answer-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.answer-btn {
+    padding: 10px 14px;
+    border: 3px solid #FFFF00;
+    border-radius: 0;
+    background: #000080;
+    color: #FFFFFF;
+    font-size: 9px;
+    cursor: pointer;
+    transition: all 0.1s;
+    text-align: left;
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+}
+
+.answer-btn:hover {
+    background: #FFFF00;
+    color: #000000;
+    box-shadow: 2px 2px 0 #000000;
+}
+
+.answer-btn.correct {
+    background: #00FF00 !important;
+    border-color: #00FF00;
+    color: #000000;
+    animation: correct-flash 0.5s;
+}
+
+.answer-btn.wrong {
+    background: #FF0000 !important;
+    border-color: #FF0000;
+    color: #FFFFFF;
+    animation: wrong-shake 0.4s;
+}
+
+@keyframes correct-flash {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+@keyframes wrong-shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.explanation-box {
+    padding: 10px 14px;
+    background: #000080;
+    border-left: 4px solid #00FFFF;
+    border-radius: 0;
+    border: 3px solid #00FFFF;
+    font-size: 9px;
+    line-height: 1.5;
+    color: #FFFFFF;
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+}
+
+.score-popup {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 28px;
+    font-weight: bold;
+    color: #FFFF00;
+    text-shadow: 2px 2px 0 #000000;
+    animation: score-pop 1s forwards;
+    pointer-events: none;
+    z-index: 10;
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+}
+
+@keyframes score-pop {
+    0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -80%) scale(1.5); }
+}
+
+/* ===== Screen: Badge / Reward ===== */
+.reward-screen {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #000000;
+    gap: 24px;
+}
+
+.reward-badge {
+    font-size: 64px;
+    animation: badge-spin 2s ease-out;
+    border: 4px solid #FFFF00;
+    padding: 16px;
+    background: #000080;
+    box-shadow: 4px 4px 0 #000000;
+}
+
+@keyframes badge-spin {
+    0% { transform: rotateY(0deg) scale(0); }
+    100% { transform: rotateY(720deg) scale(1); }
+}
+
+.reward-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #FFFF00;
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+}
+
+.reward-desc {
+    font-size: 10px;
+    color: #C0C0C0;
+    text-align: center;
+    max-width: 400px;
+    line-height: 1.6;
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+}
+
+/* ===== Screen: Final Exam ===== */
+.exam-screen {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #000000;
+    gap: 20px;
+}
+
+.exam-title {
+    font-size: 22px;
+    font-weight: bold;
+    color: #FF00FF;
+    text-shadow: 2px 2px 0 #000000;
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+}
+
+.exam-subtitle {
+    font-size: 10px;
+    color: #C0C0C0;
+    text-align: center;
+    max-width: 500px;
+    line-height: 1.6;
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+}
+
+.exam-stats {
+    display: flex;
+    gap: 40px;
+    margin-top: 10px;
+}
+
+.exam-stat {
+    text-align: center;
+}
+
+.exam-stat-value {
+    font-size: 24px;
+    font-weight: bold;
+    color: #FFFF00;
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+}
+
+.exam-stat-label {
+    font-size: 9px;
+    color: #C0C0C0;
+    text-transform: uppercase;
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+}
+
+/* ===== Misc ===== */
+.notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #000080;
+    border: 3px solid #FFFF00;
+    border-radius: 0;
+    padding: 12px 24px;
+    font-size: 10px;
+    color: #FFFFFF;
+    z-index: 1000;
+    animation: notif-slide 3s forwards;
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+}
+
+@keyframes notif-slide {
+    0% { transform: translateX(-50%) translateY(-100%); opacity: 0; }
+    10% { transform: translateX(-50%) translateY(0); opacity: 1; }
+    90% { transform: translateX(-50%) translateY(0); opacity: 1; }
+    100% { transform: translateX(-50%) translateY(-100%); opacity: 0; }
+}
+
+.float-text {
+    position: absolute;
+    font-weight: bold;
+    font-size: 14px;
+    pointer-events: none;
+    animation: float-up 1.5s forwards;
+    z-index: 5;
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+}
+
+@keyframes float-up {
+    0% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-50px); }
+}
+
+/* ===== World Menu Modal ===== */
+.world-menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+.world-menu-modal {
+    background: #000080;
+    border: 3px solid #FFFF00;
+    padding: 24px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    text-align: center;
+}
+
+.world-menu-modal h2 {
+    color: #FFFF00;
+    font-size: 16px;
+    margin-bottom: 8px;
+}
+
+.world-menu-modal p {
+    color: #C0C0C0;
+    font-size: 10px;
+    margin-bottom: 16px;
+}
+
+.world-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.world-card {
+    background: #000000;
+    border: 2px solid #FFFF00;
+    padding: 12px;
+    text-align: center;
+}
+
+.world-card h3 {
+    color: #FFFF00;
+    font-size: 12px;
+    margin-bottom: 4px;
+}
+
+.world-card p {
+    color: #C0C0C0;
+    font-size: 9px;
+    margin-bottom: 4px;
+}
+
+.world-card .world-info {
+    color: #00FFFF;
+    font-size: 8px;
+}
+
+.world-travel-btn {
+    padding: 8px 20px;
+    font-size: 10px;
+    font-weight: bold;
+    border: 2px solid #FFFF00;
+    background: #000080;
+    color: #FFFFFF;
+    cursor: pointer;
+    margin-top: 8px;
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+}
+
+.world-travel-btn:hover {
+    background: #FFFF00;
+    color: #000000;
+}
+
+.world-menu-close {
+    padding: 8px 20px;
+    font-size: 10px;
+    border: 2px solid #FFFF00;
+    background: #000080;
+    color: #FFFFFF;
+    cursor: pointer;
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+}
+
+.world-menu-close:hover {
+    background: #FF0000;
+    border-color: #FF0000;
+}
+
+/* ===== Current World Display ===== */
+#current-world {
+    font-size: 9px;
+    color: #FFFF00;
+    margin: 4px 0;
+    text-align: center;
+}
+
+/* ===== New Tile Types ===== */
+.map-tile.sand {
+    background-color: #f4d03f;
+}
+
+.map-tile.snow {
+    background-color: #FFFFFF;
+}
+
+.map-tile.crystal {
+    background-color: #9b59b6;
+}
+
+.map-tile.cloud {
+    background-color: #e8e8e8;
+}
+
+.map-tile.palm-tree {
+    background-color: #27ae60;
+}
+
+.map-tile.ice-water {
+    background-color: #5dade2;
+}
+
+.map-tile.lava {
+    background-color: #e74c3c;
+}
+
+.map-tile.rune-stone {
+    background-color: #8e44ad;
+}
+
+@media (max-width: 900px) {
+    #sidebar { display: none; }
+    .title-logo { font-size: 20px; }
+    .answer-options { grid-template-columns: 1fr; }
+}

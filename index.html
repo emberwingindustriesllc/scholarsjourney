@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAT Masters: Scholar's Journey</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="game-container">
+        <!-- Top HUD -->
+        <div id="hud">
+            <div class="hud-left">
+                <span id="player-name">SCHOLAR</span>
+                <span id="player-level">Level 1</span>
+                <span id="player-score">0 pts</span>
+            </div>
+            <div class="hud-right">
+                <span id="player-gold">💰 500</span>
+                <span id="badge-count">🏅 0/8</span>
+            </div>
+        </div>
+
+        <!-- Main content: game area + sidebar side by side -->
+        <div id="main-row">
+            <div id="game-canvas">
+                <!-- Screens get rendered here -->
+            </div>
+
+            <!-- Sidebar -->
+            <div id="sidebar">
+                <div id="player-card">
+                    <h3>Scholar Card</h3>
+                    <div id="player-avatar">🧙‍♂️</div>
+                    <div id="player-info">
+                        <p>SAT Scholar</p>
+                        <div id="current-world" style="color:var(--accent-gold);font-size:9px;margin:4px 0">Scholar's Beach</div>
+                        <button class="menu-btn" style="font-size:8px;padding:6px 10px;margin-top:4px" onclick="game.showWorldMenu()">🚉 Travel by Train</button>
+                        <div id="player-stats">
+                            <div class="stat-bar">
+                                <label>Math</label>
+                                <div class="bar"><div id="stat-math" class="bar-fill math"></div></div>
+                                <span id="stat-math-val">0%</span>
+                            </div>
+                            <div class="stat-bar">
+                                <label>Reading</label>
+                                <div class="bar"><div id="stat-reading" class="bar-fill reading"></div></div>
+                                <span id="stat-reading-val">0%</span>
+                            </div>
+                            <div class="stat-bar">
+                                <label>Writing</label>
+                                <div class="bar"><div id="stat-writing" class="bar-fill writing"></div></div>
+                                <span id="stat-writing-val">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="badges-panel">
+                    <h3>Achievement Badges</h3>
+                    <div id="badges-grid"></div>
+                </div>
+                <div id="log-panel">
+                    <h3>Quest Log</h3>
+                    <div id="log-entries"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/questions.js"></script>
+    <script src="js/battle.js"></script>
+    <script src="js/map.js"></script>
+    <script src="js/worlds.js"></script>
+    <script src="js/train.js"></script>
+    <script src="js/sound.js"></script>
+    <script src="js/game.js"></script>
+</body>
+</html>
